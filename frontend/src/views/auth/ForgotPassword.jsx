@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const handleForgotPassword = async (e) => {
     e.preventDefault();
@@ -24,7 +22,7 @@ export default function ForgotPassword() {
     try {
       const response = await axios.post('http://localhost:5000/superadmins/forgot-password', { email });
       setMessage(response.data.message);
-      setTimeout(() => navigate('/'), 5000); // Redirect after 5 seconds
+      // No redirection after the email is sent
     } catch (err) {
       console.error('Error:', err);
       if (err.response) {

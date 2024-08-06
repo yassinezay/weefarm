@@ -7,9 +7,6 @@ import Profile from "views/admin/profile";
 import DataTables from "views/admin/tables";
 import RTLDefault from "views/rtl/default";
 
-// Auth Imports
-import SignIn from "views/auth/SignIn";
-import ForgotPassword from "views/auth/ForgotPassword";
 
 // Icon Imports
 import {
@@ -17,7 +14,6 @@ import {
   MdOutlineShoppingCart,
   MdBarChart,
   MdPerson,
-  MdLock,
 } from "react-icons/md";
 
 const routes = [
@@ -51,25 +47,11 @@ const routes = [
     component: <Profile />,
   },
   {
-    name: "Sign In",
-    layout: "/auth",
-    path: "sign-in",
-    icon: <MdLock className="h-6 w-6" />,
-    component: <SignIn />,
-  },
-  {
     name: "RTL Admin",
     layout: "/rtl",
     path: "rtl",
     icon: <MdHome className="h-6 w-6" />,
     component: <RTLDefault />,
-  },
-  {
-    name: "Forgot Password",
-    layout: "/auth",
-    path: "forgot-password",
-    icon: <MdLock className="h-6 w-6" />,
-    component: <ForgotPassword />,
   }
 ];
 export default routes;

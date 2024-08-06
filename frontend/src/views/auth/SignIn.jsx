@@ -8,6 +8,7 @@ export default function SignIn() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [keepLoggedIn, setKeepLoggedIn] = useState(false); // State for checkbox
   const navigate = useNavigate(); // Initialize useNavigate
 
   const handleSignIn = async (e) => {
@@ -28,7 +29,14 @@ export default function SignIn() {
       console.log('Response:', response); // Log the response
 
       if (response.data.token) {
-        localStorage.setItem('token', response.data.token); // Store JWT token
+        // Determine expiration time based on checkbox
+        const expiration = keepLoggedIn ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000; // 30 days or 1 day in milliseconds
+        const expiryDate = new Date(new Date().getTime() + expiration);
+
+        // Store token with expiry date
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('tokenExpiry', expiryDate.toISOString());
+
         navigate('/admin/default'); // Redirect to /admin/default
       }
     } catch (err) {
@@ -59,7 +67,6 @@ export default function SignIn() {
   const handleForgotPassword = () => {
     navigate('/auth/forgot-password'); // Redirect to the correct path
   };
-  
 
   return (
     <div className="mt-16 mb-16 flex h-full w-full items-center justify-center px-2 md:mx-0 md:px-0 lg:mb-10 lg:items-center lg:justify-start">
@@ -103,7 +110,7 @@ export default function SignIn() {
           {/* Checkbox */}
           <div className="mb-4 flex items-center justify-between px-2">
             <div className="flex items-center">
-              <Checkbox />
+              <Checkbox checked={keepLoggedIn} onChange={() => setKeepLoggedIn(!keepLoggedIn)} />
               <p className="ml-2 text-sm font-medium text-navy-700 dark:text-white">
                 Keep me logged In
               </p>

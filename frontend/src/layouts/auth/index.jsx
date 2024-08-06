@@ -1,9 +1,11 @@
 import React from "react";
 import { Link, Routes, Route, Navigate } from "react-router-dom";
-import routes from "routes.js";
+import authRoutes from "router/Authroutes"; // Import authRoutes
 import Footer from "components/footer/FooterAuthDefault";
 import authImg from "assets/img/auth/auth.png";
 import FixedPlugin from "components/fixedPlugin/FixedPlugin";
+import ForgotPassword from "views/auth/ForgotPassword"; // Import ForgotPassword component
+import ResetPassword from "views/auth/ResetPassword"; // Import ResetPassword component
 
 export default function Auth() {
   const getRoutes = (routes) => {
@@ -32,9 +34,10 @@ export default function Auth() {
                   {/* Add your logo or other content here */}
                 </Link>
                 <Routes>
-                  {getRoutes(routes)}
+                  {getRoutes(authRoutes)} {/* Use authRoutes here */}
                   <Route path="/" element={<Navigate to="/auth/sign-in" replace />} />
-                  <Route path="/forgot-password" element={<Navigate to="/auth/forgot-password" replace />} />
+                  <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/auth/reset-password/:token" element={<ResetPassword />} />
                 </Routes>
                 <div className="absolute right-0 hidden h-full min-h-screen md:block lg:w-[49vw] 2xl:w-[44vw]">
                   <div

@@ -94,7 +94,7 @@ const forgotPassword = async (req, res) => {
 
         await superadmin.save();
 
-        const resetUrl = `http://localhost:3000/reset-password/${token}`;
+        const resetUrl = `http://localhost:3000/auth/reset-password/${token}`;
         const message = `You requested a password reset. Click the link to reset your password: ${resetUrl}`;
 
         await sendEmail(superadmin.email, 'Password Reset Request', message);

@@ -1,16 +1,37 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-
-import RtlLayout from "layouts/rtl";
 import AdminLayout from "layouts/admin";
 import AuthLayout from "layouts/auth";
+import adminRoutes from "routes";
+import authRoutes from "router/Authroutes";
+
 const App = () => {
   return (
     <Routes>
-      <Route path="auth/*" element={<AuthLayout />} />
-      <Route path="admin/*" element={<AdminLayout />} />
-      <Route path="rtl/*" element={<RtlLayout />} />
-      <Route path="/" element={<Navigate to="/admin" replace />} />
+      {/* Admin Routes */}
+      <Route path="admin/*" element={<AdminLayout />}>
+        {adminRoutes.map((route, index) => (
+          <Route
+            path={route.path}
+            element={route.component}
+            key={index}
+          />
+        ))}
+      </Route>
+
+      {/* Auth Routes */}
+      <Route path="auth/*" element={<AuthLayout />}>
+        {authRoutes.map((route, index) => (
+          <Route
+            path={route.path}
+            element={route.component}
+            key={index}
+          />
+        ))}
+      </Route>
+
+      {/* Default Redirect */}
+      <Route path="/" element={<Navigate to="/auth/sign-in" replace />} />
     </Routes>
   );
 };
