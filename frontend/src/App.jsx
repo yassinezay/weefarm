@@ -2,8 +2,9 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import AdminLayout from "layouts/admin";
 import AuthLayout from "layouts/auth";
-import adminRoutes from "routes";
+import adminRoutes from "router/routes";
 import authRoutes from "router/Authroutes";
+
 
 const App = () => {
   return (

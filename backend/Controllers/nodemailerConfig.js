@@ -8,7 +8,7 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-const sendEmail = async (to, subject, text) => {
+const sendEmail = async (to, subject, text) => {    
     const mailOptions = {
         from: 'zayaneyassine6@gmail.com',
         to,

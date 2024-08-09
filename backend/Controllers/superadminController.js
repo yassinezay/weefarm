@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { sendEmail } = require('./nodemailerConfig');
 const { Op } = require('sequelize'); // Import Op from Sequelize
-
+const { User } = require('../Models');
 
 const JWT_SECRET = '1234567';
 
@@ -139,12 +139,58 @@ const resetPassword = async (req, res) => {
     }
   };
 
+  const sendRegistrationLink = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ message: 'Email is required' });
+        }
+
+        // Check if a user with the email already exists
+        const existingUser = await User.findOne({ where: { email } });
+
+        if (existingUser) {
+            return res.status(400).json({ message: 'User already exists' });
+        }
+
+        // Generate a registration token
+        const token = crypto.randomBytes(20).toString('hex');
+        const tokenExpires = Date.now() + 3600000; // 1 hour from now
+
+        // Create a new User entry with just the email and token
+        const newUser = await User.create({
+            email,
+            role: 'admin', // or any role you want to set
+            resetPasswordToken: token,
+            resetPasswordExpires: tokenExpires,
+            isActive: false // User is inactive until they complete registration
+        });
+
+        // Create the registration URL
+        const registrationUrl = `http://localhost:3000/auth/register/${token}`;
+        const message = `You have been invited to register as an admin. Click the link to set up your account: ${registrationUrl}`;
+
+        // Send the registration email
+        await sendEmail(email, 'Admin Registration Invitation', message);
+
+        res.status(200).json({ message: 'Registration link sent' });
+    } catch (error) {
+        console.error('Error in sendRegistrationLink:', error); // Log the full error details
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+};
+
+
+
+
 
 module.exports = {
     getSuperadminById,
     updateSuperadmin,
     login,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    sendRegistrationLink
 };
 

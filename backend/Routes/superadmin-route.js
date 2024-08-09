@@ -17,4 +17,6 @@ router.post('/forgot-password', superadminController.forgotPassword);
 // Reset Password
 router.post('/reset-password', superadminController.resetPassword);
 
+router.post('/send-registration-link', superadminController.sendRegistrationLink);
+
 module.exports = router;

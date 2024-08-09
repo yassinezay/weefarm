@@ -3,7 +3,9 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Navbar from "components/navbar";
 import Sidebar from "components/sidebar";
 import Footer from "components/footer/Footer";
-import routes from "routes.js";
+import routes from "router/routes"; // Import routes from routes.js
+import Adminroutes from "router/Adminroutes"; // Import Adminroutes
+import InviteUser from "views/admin/accounts/ajoutadmin";
 
 export default function Admin(props) {
   const { ...rest } = props;
@@ -12,77 +14,66 @@ export default function Admin(props) {
   const [currentRoute, setCurrentRoute] = React.useState("Main Dashboard");
 
   React.useEffect(() => {
-    window.addEventListener("resize", () =>
-      window.innerWidth < 1200 ? setOpen(false) : setOpen(true)
-    );
+    const handleResize = () => {
+      window.innerWidth < 1200 ? setOpen(false) : setOpen(true);
+    };
+
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Call it once to set the initial state
+
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
+
   React.useEffect(() => {
-    getActiveRoute(routes);
+    getActiveRoute([...routes, ...Adminroutes]); // Combine routes from both sources
   }, [location.pathname]);
 
   const getActiveRoute = (routes) => {
-    let activeRoute = "Main Dashboard";
     for (let i = 0; i < routes.length; i++) {
-      if (
-        window.location.href.indexOf(
-          routes[i].layout + "/" + routes[i].path
-        ) !== -1
-      ) {
+      if (window.location.href.includes(routes[i].layout + "/" + routes[i].path)) {
         setCurrentRoute(routes[i].name);
+        return;
       }
     }
-    return activeRoute;
+    setCurrentRoute("Main Dashboard");
   };
-  const getActiveNavbar = (routes) => {
-    let activeNavbar = false;
-    for (let i = 0; i < routes.length; i++) {
-      if (
-        window.location.href.indexOf(routes[i].layout + routes[i].path) !== -1
-      ) {
-        return routes[i].secondary;
-      }
-    }
-    return activeNavbar;
-  };
+
   const getRoutes = (routes) => {
     return routes.map((prop, key) => {
       if (prop.layout === "/admin") {
         return (
           <Route path={`/${prop.path}`} element={prop.component} key={key} />
         );
-      } else {
-        return null;
       }
+      return null;
     });
   };
 
+  const getActiveNavbar = (routes) => {
+    const activeRoute = routes.find(route => window.location.href.includes(route.layout + "/" + route.path));
+    return activeRoute ? activeRoute.navbarItems : [];
+  };
+
   document.documentElement.dir = "ltr";
+
   return (
     <div className="flex h-full w-full">
       <Sidebar open={open} onClose={() => setOpen(false)} />
-      {/* Navbar & Main Content */}
       <div className="h-full w-full bg-lightPrimary dark:!bg-navy-900">
-        {/* Main Content */}
-        <main
-          className={`mx-[12px] h-full flex-none transition-all md:pr-2 xl:ml-[313px]`}
-        >
-          {/* Routes */}
+        <main className="mx-[12px] h-full flex-none transition-all md:pr-2 xl:ml-[313px]">
           <div className="h-full">
             <Navbar
               onOpenSidenav={() => setOpen(true)}
               logoText={"Horizon UI Tailwind React"}
               brandText={currentRoute}
-              secondary={getActiveNavbar(routes)}
+              secondary={getActiveNavbar([...routes, ...Adminroutes])}
               {...rest}
             />
             <div className="pt-5s mx-auto mb-auto h-full min-h-[84vh] p-2 md:pr-2">
               <Routes>
-                {getRoutes(routes)}
-
-                <Route
-                  path="/"
-                  element={<Navigate to="/admin/default" replace />}
-                />
+                {getRoutes([...routes, ...Adminroutes])}
+                <Route path="/" element={<Navigate to="/admin/default" replace />} />
+                <Route path="/admin/accounts/ajoutadmin" element={<InviteUser />} />
               </Routes>
             </div>
             <div className="p-3">
