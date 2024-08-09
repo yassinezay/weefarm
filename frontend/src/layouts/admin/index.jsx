@@ -6,6 +6,7 @@ import Footer from "components/footer/Footer";
 import routes from "router/routes"; // Import routes from routes.js
 import Adminroutes from "router/Adminroutes"; // Import Adminroutes
 import InviteUser from "views/admin/accounts/ajoutadmin";
+import EditAdmin from "views/admin/accounts/editadmin";
 
 export default function Admin(props) {
   const { ...rest } = props;
@@ -74,7 +75,8 @@ export default function Admin(props) {
                 {getRoutes([...routes, ...Adminroutes])}
                 <Route path="/" element={<Navigate to="/admin/default" replace />} />
                 <Route path="/admin/accounts/ajoutadmin" element={<InviteUser />} />
-              </Routes>
+                <Route path="/admin/accounts/editadmin/:id" element={<EditAdmin />} />
+                </Routes>
             </div>
             <div className="p-3">
               <Footer />
