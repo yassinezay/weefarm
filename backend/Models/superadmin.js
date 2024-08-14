@@ -1,5 +1,10 @@
 module.exports = (sequelize, DataTypes) => {
     const Superadmin = sequelize.define("Superadmin", {
+        id: {
+            type: DataTypes.INTEGER,
+            autoIncrement: true,
+            primaryKey: true
+        },
         fullname: {
             type: DataTypes.STRING,
             allowNull: false

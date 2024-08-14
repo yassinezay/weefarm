@@ -15,38 +15,52 @@ export default function SignIn() {
     e.preventDefault();
     setLoading(true);
     setError('');
-
-    console.log('Submitting form with:', { email, password }); // Debug log
-
+  
+    console.log('Submitting form with:', { email, password });
+  
     if (!email.trim() || !password.trim()) {
       setError('Email and password are required');
       setLoading(false);
       return;
     }
-
+  
     try {
       const response = await axios.post('http://localhost:5000/superadmins/login', { email, password });
-      console.log('Response:', response); // Log the response
-
-      if (response.data.token) {
-        // Determine expiration time based on checkbox
-        const expiration = keepLoggedIn ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000; // 30 days or 1 day in milliseconds
+      console.log('Response:', response); // Log the full response
+  
+      if (response.data && response.data.token) {
+        const expiration = keepLoggedIn ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000;
         const expiryDate = new Date(new Date().getTime() + expiration);
-
-        // Store token with expiry date
+  
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('tokenExpiry', expiryDate.toISOString());
-
-        navigate('/admin/default'); // Redirect to /admin/default
+  
+        if (response.data.user) {
+          console.log('User Data:', response.data.user); // Log user data to inspect its structure
+  
+          const { fullname, email, id } = response.data.user;
+  
+          localStorage.setItem('fullname', fullname || '');
+          localStorage.setItem('email', email || '');
+          localStorage.setItem('id', id || ''); // Ensure this is correct
+  
+          console.log('Full name saved:', localStorage.getItem('fullname'));
+          console.log('Email saved:', localStorage.getItem('email'));
+          console.log('User ID saved:', localStorage.getItem('id'));
+        } else {
+          console.error('User data is missing');
+        }
+  
+        navigate('/admin/default');
       }
     } catch (err) {
-      console.error('Error:', err); // Log the error
-
+      console.error('Error:', err);
+  
       if (err.response) {
         const { status, data } = err.response;
         console.log('Error status:', status);
         console.log('Error data:', data);
-
+  
         if (status === 404) {
           setError('Invalid email or password');
         } else if (status === 500) {
@@ -63,6 +77,8 @@ export default function SignIn() {
       setLoading(false);
     }
   };
+  
+  
 
   const handleForgotPassword = () => {
     navigate('/auth/forgot-password'); // Redirect to the correct path

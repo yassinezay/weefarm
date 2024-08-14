@@ -19,4 +19,7 @@ router.post('/reset-password', superadminController.resetPassword);
 
 router.post('/send-registration-link', superadminController.sendRegistrationLink);
 
+router.put('/update-profile/:id', superadminController.updateProfile);
+
+
 module.exports = router;

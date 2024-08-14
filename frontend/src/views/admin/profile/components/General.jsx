@@ -1,7 +1,37 @@
-import Card from "components/card";
-import React from "react";
+import React, { useState } from 'react';
+import Card from 'components/card';
+import axios from 'axios';
 
-const General = () => {
+const General = ({ fullname: initialFullname, email }) => {
+  const [fullname, setFullname] = useState(initialFullname);
+  const [isEditing, setIsEditing] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  const handleSave = async () => {
+    const userId = localStorage.getItem('id'); // Retrieve user ID from localStorage
+
+    if (!userId) {
+        setError('User ID not found. Please log in again.');
+        return;
+    }
+
+    try {
+        const response = await axios.put(`http://localhost:5000/superadmins/update-profile/${userId}`, {
+            fullname // Only send fullname to update
+        });
+
+        if (response.status === 200) {
+            setSuccess('Profile updated successfully!');
+            setIsEditing(false);
+            localStorage.setItem('fullname', fullname); // Update localStorage
+        }
+    } catch (err) {
+        console.error('Error:', err); // Log error details
+        setError('Failed to update profile. Please try again.');
+    }
+};
+
   return (
     <Card extra={"w-full h-full p-3"}>
       {/* Header */}
@@ -10,57 +40,52 @@ const General = () => {
           General Information
         </h4>
         <p className="mt-2 px-2 text-base text-gray-600">
-          As we live, our hearts turn colder. Cause pain is what we go through
-          as we become older. We get insulted by others, lose trust for those
-          others. We get back stabbed by friends. It becomes harder for us to
-          give others a hand. We get our heart broken by people we love, even
-          that we give them all...
+          Manage your settings here. You can customize your profile, adjust preferences, and more.
         </p>
       </div>
       {/* Cards */}
       <div className="grid grid-cols-2 gap-4 px-2">
         <div className="flex flex-col items-start justify-center rounded-2xl bg-white bg-clip-border px-3 py-4 shadow-3xl shadow-shadow-500 dark:!bg-navy-700 dark:shadow-none">
-          <p className="text-sm text-gray-600">Education</p>
-          <p className="text-base font-medium text-navy-700 dark:text-white">
-            Stanford University
-          </p>
+          <p className="text-sm text-gray-600">Full Name</p>
+          {isEditing ? (
+            <>
+              <input
+                type="text"
+                value={fullname}
+                onChange={(e) => setFullname(e.target.value)}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              />
+              <button
+                onClick={handleSave}
+                className="mt-2 rounded-xl bg-brand-500 py-2 px-4 text-base font-medium text-white transition duration-200 hover:bg-brand-600 active:bg-brand-700 dark:bg-brand-400 dark:text-white dark:hover:bg-brand-300 dark:active:bg-brand-200"
+              >
+                Save
+              </button>
+            </>
+          ) : (
+            <p className="text-base font-medium text-navy-700 dark:text-white">
+              {fullname}
+            </p>
+          )}
+          <button
+            onClick={() => setIsEditing(!isEditing)}
+            className="mt-2 text-sm font-medium text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+          >
+            {isEditing ? 'Cancel' : 'Edit'}
+          </button>
         </div>
 
         <div className="flex flex-col justify-center rounded-2xl bg-white bg-clip-border px-3 py-4 shadow-3xl shadow-shadow-500 dark:!bg-navy-700 dark:shadow-none">
-          <p className="text-sm text-gray-600">Languages</p>
+          <p className="text-sm text-gray-600">Email</p>
           <p className="text-base font-medium text-navy-700 dark:text-white">
-            English, Spanish, Italian
-          </p>
-        </div>
-
-        <div className="flex flex-col items-start justify-center rounded-2xl bg-white bg-clip-border px-3 py-4 shadow-3xl shadow-shadow-500 dark:!bg-navy-700 dark:shadow-none">
-          <p className="text-sm text-gray-600">Department</p>
-          <p className="text-base font-medium text-navy-700 dark:text-white">
-            Product Design
-          </p>
-        </div>
-
-        <div className="flex flex-col justify-center rounded-2xl bg-white bg-clip-border px-3 py-4 shadow-3xl shadow-shadow-500 dark:!bg-navy-700 dark:shadow-none">
-          <p className="text-sm text-gray-600">Work History</p>
-          <p className="text-base font-medium text-navy-700 dark:text-white">
-            English, Spanish, Italian
-          </p>
-        </div>
-
-        <div className="flex flex-col items-start justify-center rounded-2xl bg-white bg-clip-border px-3 py-4 shadow-3xl shadow-shadow-500 dark:!bg-navy-700 dark:shadow-none">
-          <p className="text-sm text-gray-600">Organization</p>
-          <p className="text-base font-medium text-navy-700 dark:text-white">
-            Simmmple Web LLC
-          </p>
-        </div>
-
-        <div className="flex flex-col justify-center rounded-2xl bg-white bg-clip-border px-3 py-4 shadow-3xl shadow-shadow-500 dark:!bg-navy-700 dark:shadow-none">
-          <p className="text-sm text-gray-600">Birthday</p>
-          <p className="text-base font-medium text-navy-700 dark:text-white">
-            20 July 1986
+            {email}
           </p>
         </div>
       </div>
+
+      {/* Display success or error messages */}
+      {success && <p className="text-green-500 mt-2">{success}</p>}
+      {error && <p className="text-red-500 mt-2">{error}</p>}
     </Card>
   );
 };

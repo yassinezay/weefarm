@@ -1,94 +1,59 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import TopCreatorTable from "./components/TableTopCreators";
-import axios from 'axios';
+import React, { useState } from "react";
 
-const Accounts = () => {
-  const navigate = useNavigate();
-  const [admins, setAdmins] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+const InviteUser = () => {
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [messageColor, setMessageColor] = useState(""); // State to manage message color
 
-  useEffect(() => {
-    // Fetch admins on component mount
-    const fetchAdmins = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/users/admins');
-        setAdmins(response.data);
-      } catch (err) {
-        setError('Failed to fetch admins. Please try again later.');
-      } finally {
-        setLoading(false);
+  const handleSendInvite = async () => {
+    try {
+        const response = await fetch('http://localhost:5000/superadmins/send-registration-link', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email }),
+          });
+
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage("Invitation sent successfully!");
+        setMessageColor("text-green-500"); // Set color to green
+      } else {
+        setMessage(`Error: ${data.message}`);
+        setMessageColor("text-red-500"); // Set color to red for errors
       }
-    };
+    } catch (error) {
+      setMessage("An error occurred. Please try again.");
+      setMessageColor("text-red-500"); // Set color to red for errors
 
-    fetchAdmins();
-  }, []);
-
-  const handleAddAdmin = () => {
-    navigate('/admin/accounts/ajoutadmin');
-  };
-
-  const handleActivate = async (id) => {
-    try {
-      await axios.post(`http://localhost:5000/users/activate/${id}`);
-      setAdmins(prevAdmins =>
-        prevAdmins.map(admin => 
-          admin.id === id ? { ...admin, isActive: 1 } : admin
-        )
-      );
-    } catch (err) {
-      setError('Failed to activate user. Please try again later.');
     }
   };
-
-  const handleDeactivate = async (id) => {
-    try {
-      await axios.post(`http://localhost:5000/users/deactivate/${id}`);
-      setAdmins(prevAdmins =>
-        prevAdmins.map(admin => 
-          admin.id === id ? { ...admin, isActive: 0 } : admin
-        )
-      );
-    } catch (err) {
-      setError('Failed to deactivate user. Please try again later.');
-    }
-  };
-
-  const tableColumns = [
-    { Header: 'Full Name', accessor: 'fullname' },
-    { Header: 'Email', accessor: 'email' },
-    { Header: 'Status', accessor: 'isActive', Cell: ({ value }) => (value ? 'Activated' : 'Deactivated') },
-    { Header: 'Actions', accessor: 'actions' }
-  ];
 
   return (
     <div className="mt-3 grid h-full grid-cols-1 gap-5">
-      <button
-        onClick={handleAddAdmin}
-        className="linear mt-4 flex items-center justify-center rounded-xl bg-brand-500 px-2 py-2 text-base font-medium text-white transition duration-200 hover:bg-brand-600 active:bg-brand-700 dark:bg-brand-400 dark:text-white dark:hover:bg-brand-300 dark:active:bg-brand-200"
-      >
-        Ajouter Admin
-      </button>
-      <div className="pt-12">
-        {loading ? (
-          <p>Loading...</p>
-        ) : error ? (
-          <p className="text-red-500">{error}</p>
-        ) : (
-          <div className="h-[600px] overflow-y-auto">
-            <TopCreatorTable
-              extra="mb-5"
-              tableData={admins}
-              columnsData={tableColumns}
-              onActivate={handleActivate}
-              onDeactivate={handleDeactivate}
-            />
-          </div>
-        )}
+      <div className="col-span-1 mb-4">
+        <h2 className="text-xl font-bold mb-4">Invite User</h2>
+        <label className="block text-sm font-medium text-gray-700">Email:</label>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          placeholder="Enter user email"
+        />
+        <button
+          onClick={handleSendInvite}
+          className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Send Invite
+        </button>
+        {message && <p className={`mt-2 text-sm ${messageColor}`}>{message}</p>}
       </div>
     </div>
   );
 };
 
-export default Accounts;
+export default InviteUser;

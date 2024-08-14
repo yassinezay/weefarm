@@ -5,6 +5,8 @@ const crypto = require('crypto');
 const { sendEmail } = require('./nodemailerConfig');
 const { Op } = require('sequelize'); // Import Op from Sequelize
 const { User } = require('../Models');
+const { sequelize } = require('../Models');
+
 
 const JWT_SECRET = '1234567';
 
@@ -71,12 +73,22 @@ const login = async (req, res) => {
         };
 
         const token = jwt.sign(payload, JWT_SECRET);
-        res.status(200).json({ token });
+
+        // Return both the token and user details
+        res.status(200).json({
+            token,
+            user: {
+                id: superadmin.id, // Ensure this is included
+                fullname: superadmin.fullname,
+                email: superadmin.email
+            }
+        });
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+
 
 // Forgot Password
 const forgotPassword = async (req, res) => {
@@ -180,9 +192,31 @@ const resetPassword = async (req, res) => {
         res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 };
+const updateProfile = async (req, res) => {
+    try {
+        const userId = req.params.id; // Use `userId` to be more descriptive
+        const { fullname } = req.body; // Only get fullname from request body
 
+        console.log(`Updating Superadmin with ID: ${userId}`);
 
+        // Find the superadmin by ID
+        const superadmin = await Superadmin.findOne({ where: { id: userId } });
+        if (!superadmin) {
+            return res.status(404).json({ message: 'Superadmin not found' });
+        }
 
+        // Update the superadmin fields
+        await superadmin.update({
+            fullname: fullname || superadmin.fullname,
+        });
+
+        // Return the updated superadmin
+        res.status(200).json(superadmin);
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
 
 
 module.exports = {
@@ -191,6 +225,7 @@ module.exports = {
     login,
     forgotPassword,
     resetPassword,
-    sendRegistrationLink
+    sendRegistrationLink,
+    updateProfile
 };
 

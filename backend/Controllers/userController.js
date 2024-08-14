@@ -88,17 +88,17 @@ const deactivateUser = async (req, res) => {
     }
 };
 
-// Function to update user information
 const updateUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const { fullname, email } = req.body;
+        const { fullname, email, role } = req.body; // Include role in request body
 
         const user = await User.findByPk(id);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
         user.fullname = fullname;
         user.email = email;
+        user.role = role; // Update the role
         await user.save();
 
         res.status(200).json({ message: 'User updated successfully' });
