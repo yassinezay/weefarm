@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { MdModeEditOutline } from "react-icons/md";
 import Card from "components/card";
 
 const Project = () => {
@@ -51,7 +50,6 @@ const Project = () => {
                 </div>
               </div>
               <div className="mr-4 flex items-center justify-center text-gray-600 dark:text-white">
-                <MdModeEditOutline />
               </div>
             </div>
           ))
