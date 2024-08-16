@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         isActive: {
             type: DataTypes.BOOLEAN,
-            defaultValue: false // To manage active/inactive state of the utilisateur
+            defaultValue: false
         },
         resetPasswordToken: {
             type: DataTypes.STRING,
@@ -32,6 +32,18 @@ module.exports = (sequelize, DataTypes) => {
         resetPasswordExpires: {
             type: DataTypes.DATE,
             allowNull: true
+        },
+        companyName: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        companyFunctionality: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        phoneNumber: {
+            type: DataTypes.STRING,
+            allowNull: true,
         }
     });
 

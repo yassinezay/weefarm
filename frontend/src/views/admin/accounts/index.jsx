@@ -62,6 +62,9 @@ const Accounts = () => {
     { Header: 'Full Name', accessor: 'fullname' },
     { Header: 'Email', accessor: 'email' },
     { Header: 'Role', accessor: 'role' }, // Added Role column
+    { Header: 'Company Name', accessor: 'companyName' }, 
+    { Header: 'Company Functionality', accessor: 'companyFunctionality' },
+    { Header: 'Phone Number', accessor: 'phoneNumber' },
     { Header: 'Status', accessor: 'isActive', Cell: ({ value }) => (value ? 'Activated' : 'Deactivated') },
     { 
       Header: 'Actions', 

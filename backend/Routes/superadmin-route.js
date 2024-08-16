@@ -21,5 +21,7 @@ router.post('/send-registration-link', superadminController.sendRegistrationLink
 
 router.put('/update-profile/:id', superadminController.updateProfile);
 
+router.get('/history/:id', superadminController.getHistoryByAdminId);
+
 
 module.exports = router;

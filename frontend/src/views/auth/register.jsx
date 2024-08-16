@@ -3,21 +3,24 @@ import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 
 export default function Register() {
-  const [fullname, setFullname] = useState(''); // New state for fullname
+  const [fullname, setFullname] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [companyName, setCompanyName] = useState(''); // New state for company name
+  const [companyFunctionality, setCompanyFunctionality] = useState(''); // New state for company functionality
+  const [phoneNumber, setPhoneNumber] = useState(''); // New state for phone number
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { token } = useParams(); // Use useParams for path parameter
+  const { token } = useParams();
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    if (!fullname.trim() || !password.trim() || !confirmPassword.trim()) {
-      setError('Full name, password, and confirmation are required');
+    if (!fullname.trim() || !password.trim() || !confirmPassword.trim() || !companyName.trim() || !companyFunctionality.trim() || !phoneNumber.trim()) {
+      setError('Full name, company name, company functionality, phone number, password, and confirmation are required');
       setLoading(false);
       return;
     }
@@ -29,7 +32,14 @@ export default function Register() {
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/users/register', { token, fullname, password });
+      const response = await axios.post('http://localhost:5000/users/register', { 
+        token, 
+        fullname, 
+        password, 
+        companyName, 
+        companyFunctionality, 
+        phoneNumber 
+      });
 
       if (response.status === 200) {
         navigate('/auth/sign-in');
@@ -65,6 +75,51 @@ export default function Register() {
               value={fullname}
               onChange={(e) => setFullname(e.target.value)}
               placeholder="Enter your full name"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+          </div>
+
+          {/* Company Name */}
+          <div className="mb-3">
+            <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 dark:text-white">
+              Company Name*
+            </label>
+            <input
+              type="text"
+              id="companyName"
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+              placeholder="Enter your company name"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+          </div>
+
+          {/* Company Functionality */}
+          <div className="mb-3">
+            <label htmlFor="companyFunctionality" className="block text-sm font-medium text-gray-700 dark:text-white">
+              Company Functionality*
+            </label>
+            <input
+              type="text"
+              id="companyFunctionality"
+              value={companyFunctionality}
+              onChange={(e) => setCompanyFunctionality(e.target.value)}
+              placeholder="Enter the functionality of your company"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+          </div>
+
+          {/* Phone Number */}
+          <div className="mb-3">
+            <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 dark:text-white">
+              Phone Number*
+            </label>
+            <input
+              type="text"
+              id="phoneNumber"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              placeholder="Enter your phone number"
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             />
           </div>

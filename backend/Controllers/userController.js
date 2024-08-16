@@ -1,44 +1,47 @@
 const bcrypt = require('bcrypt');
-const { User } = require('../Models'); // Adjust the path as necessary
+const { User } = require('../Models'); // Ajustez le chemin si nécessaire
 const { Op } = require('sequelize');
 
-// Function to handle user registration after they click the link
+// Fonction pour gérer l'enregistrement de l'utilisateur après avoir cliqué sur le lien
 const registerUser = async (req, res) => {
     try {
-        const { token, password, fullname } = req.body;
+        const { token, password, fullname, companyName, companyFunctionality, phoneNumber } = req.body;
 
         if (!token || !password || !fullname) {
-            return res.status(400).json({ message: 'Token, password, and full name are required' });
+            return res.status(400).json({ message: 'Le token, le mot de passe et le nom complet sont requis' });
         }
 
         const user = await User.findOne({
             where: {
                 resetPasswordToken: token,
-                resetPasswordExpires: { [Op.gt]: new Date() } // Ensure the token is not expired
+                resetPasswordExpires: { [Op.gt]: new Date() } // S'assurer que le token n'est pas expiré
             }
         });
 
         if (!user) {
-            return res.status(400).json({ message: 'Invalid or expired token' });
+            return res.status(400).json({ message: 'Token invalide ou expiré' });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
         user.password = hashedPassword;
-        user.fullname = fullname; // Update this field as well
+        user.fullname = fullname; // Mettre à jour ce champ aussi
+        user.companyName = companyName;
+        user.companyFunctionality = companyFunctionality;
+        user.phoneNumber = phoneNumber;
         user.isActive = true;
         user.resetPasswordToken = null;
         user.resetPasswordExpires = null;
         await user.save();
 
-        res.status(200).json({ message: 'Registration successful' });
+        res.status(200).json({ message: 'Inscription réussie' });
     } catch (error) {
-        console.error('Error in registerUser:', error);
-        res.status(500).json({ message: 'Internal server error', error: error.message });
+        console.error('Erreur dans registerUser:', error);
+        res.status(500).json({ message: 'Erreur interne du serveur', error: error.message });
     }
 };
 
-// Define the route to get all admins, sorted by creation date (newest to oldest)
+// Définir la route pour obtenir tous les admins, triés par date de création (du plus récent au plus ancien)
 const getAdmins = async (req, res) => {
     try {
         const admins = await User.findAll({
@@ -46,101 +49,113 @@ const getAdmins = async (req, res) => {
                 role: 'admin'
             },
             order: [['createdAt', 'DESC']],
-            attributes: ['id', 'fullname', 'email', 'isActive', 'role'] // Include 'role' here
+            attributes: ['id', 'fullname', 'email', 'isActive', 'role', 'companyName', 'companyFunctionality', 'phoneNumber'] // Inclure les nouveaux champs ici
         });
         
         res.status(200).json(admins);
     } catch (error) {
-        console.error('Error fetching admins:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error('Erreur lors de la récupération des admins:', error);
+        res.status(500).json({ message: 'Erreur interne du serveur' });
     }
 };
 
-// Function to activate a user
+// Fonction pour activer un utilisateur
 const activateUser = async (req, res) => {
     try {
         const { id } = req.params;
         const user = await User.findByPk(id);
-        if (!user) return res.status(404).json({ message: 'User not found' });
+        if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
 
         user.isActive = 1;
         await user.save();
-        res.status(200).json({ message: 'User activated' });
+        res.status(200).json({ message: 'Utilisateur activé' });
     } catch (error) {
-        console.error('Error activating user:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error('Erreur lors de l\'activation de l\'utilisateur:', error);
+        res.status(500).json({ message: 'Erreur interne du serveur' });
     }
 };
 
-// Function to deactivate a user
+// Fonction pour désactiver un utilisateur
 const deactivateUser = async (req, res) => {
     try {
         const { id } = req.params;
         const user = await User.findByPk(id);
-        if (!user) return res.status(404).json({ message: 'User not found' });
+        if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
 
         user.isActive = 0;
         await user.save();
-        res.status(200).json({ message: 'User deactivated' });
+        res.status(200).json({ message: 'Utilisateur désactivé' });
     } catch (error) {
-        console.error('Error deactivating user:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error('Erreur lors de la désactivation de l\'utilisateur:', error);
+        res.status(500).json({ message: 'Erreur interne du serveur' });
     }
 };
 
+// Fonction pour mettre à jour les informations d'un utilisateur
 const updateUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const { fullname, email, role } = req.body; // Include role in request body
+        const { fullname, email, role, companyName, companyFunctionality, phoneNumber } = req.body; // Inclure les nouveaux champs
 
         const user = await User.findByPk(id);
-        if (!user) return res.status(404).json({ message: 'User not found' });
+        if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
 
         user.fullname = fullname;
         user.email = email;
-        user.role = role; // Update the role
+        user.role = role; // Mettre à jour le rôle
+        user.companyName = companyName;
+        user.companyFunctionality = companyFunctionality;
+        user.phoneNumber = phoneNumber;
         await user.save();
 
-        res.status(200).json({ message: 'User updated successfully' });
+        res.status(200).json({ message: 'Utilisateur mis à jour avec succès' });
     } catch (error) {
-        console.error('Error updating user:', error);
-        res.status(500).json({ message: 'Failed to update user', error: error.message });
+        console.error('Erreur lors de la mise à jour de l\'utilisateur:', error);
+        res.status(500).json({ message: 'Échec de la mise à jour de l\'utilisateur', error: error.message });
     }
 };
 
-// Function to delete a user
+// Fonction pour supprimer un utilisateur
 const deleteUser = async (req, res) => {
     try {
         const { id } = req.params;
 
         const user = await User.findByPk(id);
-        if (!user) return res.status(404).json({ message: 'User not found' });
+        if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
 
         await user.destroy();
-        res.status(200).json({ message: 'User deleted successfully' });
+        res.status(200).json({ message: 'Utilisateur supprimé avec succès' });
     } catch (error) {
-        console.error('Error deleting user:', error);
-        res.status(500).json({ message: 'Failed to delete user', error: error.message });
+        console.error('Erreur lors de la suppression de l\'utilisateur:', error);
+        res.status(500).json({ message: 'Échec de la suppression de l\'utilisateur', error: error.message });
     }
 };
 
-// Function to get a specific admin by ID
+// Fonction pour obtenir un administrateur spécifique par ID
 const getAdminById = async (req, res) => {
     try {
         const { id } = req.params;
         const admin = await User.findByPk(id, {
-            attributes: ['id', 'fullname', 'email', 'isActive', 'role'] // Include fields you want to retrieve
+            attributes: ['id', 'fullname', 'email', 'isActive', 'role', 'companyName', 'companyFunctionality', 'phoneNumber'] // Inclure les champs que vous voulez récupérer
         });
 
         if (!admin) {
-            return res.status(404).json({ message: 'Admin not found' });
+            return res.status(404).json({ message: 'Administrateur non trouvé' });
         }
 
         res.status(200).json(admin);
     } catch (error) {
-        console.error('Error fetching admin:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error('Erreur lors de la récupération de l\'administrateur:', error);
+        res.status(500).json({ message: 'Erreur interne du serveur' });
     }
 };
 
-module.exports = { registerUser, getAdmins, activateUser, deactivateUser, updateUser, deleteUser, getAdminById  };
+module.exports = { 
+    registerUser, 
+    getAdmins, 
+    activateUser, 
+    deactivateUser, 
+    updateUser, 
+    deleteUser, 
+    getAdminById  
+};
