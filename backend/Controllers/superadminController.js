@@ -59,29 +59,36 @@ const updateSuperadmin = async (req, res) => {
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const superadmin = await Superadmin.findOne({ where: { email } });
+        let user = await Superadmin.findOne({ where: { email } });
+        let role = 'superadmin';
 
-        if (!superadmin) {
+        if (!user) {
+            user = await User.findOne({ where: { email } });
+            role = 'user';
+        }
+
+        if (!user) {
             return res.status(404).json({ message: 'Email or password invalid!' });
         }
 
-        const validPass = bcrypt.compareSync(password, superadmin.password);
+        const validPass = bcrypt.compareSync(password, user.password);
 
         if (!validPass) {
             return res.status(404).json({ message: 'Email or password invalid!' });
         }
 
         const payload = {
-            id: superadmin.id,
-            email: superadmin.email,
-            fullname: superadmin.fullname
+            id: user.id,
+            email: user.email,
+            fullname: user.fullname,
+            role
         };
 
         const token = jwt.sign(payload, JWT_SECRET);
 
         // Log the login action
         await History.create({
-            userId: superadmin.id,
+            userId: user.id,
             action: 'Logged in',
             timestamp: new Date()
         });
@@ -89,9 +96,10 @@ const login = async (req, res) => {
         res.status(200).json({
             token,
             user: {
-                id: superadmin.id,
-                fullname: superadmin.fullname,
-                email: superadmin.email
+                id: user.id,
+                fullname: user.fullname,
+                email: user.email,
+                role
             }
         });
     } catch (error) {
@@ -101,30 +109,37 @@ const login = async (req, res) => {
 
 
 
+
 // Forgot Password
 const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
-        const superadmin = await Superadmin.findOne({ where: { email } });
+        let user = await Superadmin.findOne({ where: { email } });
+        let role = 'superadmin';
 
-        if (!superadmin) {
-            return res.status(404).json({ message: 'Superadmin not found' });
+        if (!user) {
+            user = await User.findOne({ where: { email } });
+            role = 'user';
+        }
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
         }
 
         const token = crypto.randomBytes(20).toString('hex');
-        superadmin.resetPasswordToken = token;
-        superadmin.resetPasswordExpires = Date.now() + 3600000; // 1 hour from now
+        user.resetPasswordToken = token;
+        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour from now
 
-        await superadmin.save();
+        await user.save();
 
         const resetUrl = `http://localhost:3000/auth/reset-password/${token}`;
         const message = `You requested a password reset. Click the link to reset your password: ${resetUrl}`;
 
-        await sendEmail(superadmin.email, 'Password Reset Request', message);
+        await sendEmail(user.email, 'Password Reset Request', message);
 
         // Log the forgot password action
         await History.create({
-            userId: superadmin.id,
+            userId: user.id,
             action: 'Requested password reset',
             timestamp: new Date()
         });
@@ -136,45 +151,56 @@ const forgotPassword = async (req, res) => {
     }
 };
 
+
 // Reset Password
 const resetPassword = async (req, res) => {
     try {
-      const { token, password } = req.body;
-  
-      const superadmin = await Superadmin.findOne({
-        where: {
-          resetPasswordToken: token,
-          resetPasswordExpires: { [Op.gt]: Date.now() } // Ensure the token has not expired
-        }
-      });
-  
-      if (!superadmin) {
-        return res.status(400).json({ message: 'Invalid or expired token' });
-      }
-  
-      // Hash the new password
-      const hashedPassword = bcrypt.hashSync(password, 10);
-  
-      // Update password and clear the reset token and expiration
-      superadmin.password = hashedPassword;
-      superadmin.resetPasswordToken = null;
-      superadmin.resetPasswordExpires = null;
-  
-      await superadmin.save();
+        const { token, password } = req.body;
 
-      // Log the password reset action
-      await History.create({
-        userId: superadmin.id,
-        action: 'Password reset',
-        timestamp: new Date()
-      });
-  
-      res.status(200).json({ message: 'Password has been reset successfully' });
+        let user = await Superadmin.findOne({
+            where: {
+                resetPasswordToken: token,
+                resetPasswordExpires: { [Op.gt]: Date.now() } // Ensure the token has not expired
+            }
+        });
+
+        if (!user) {
+            user = await User.findOne({
+                where: {
+                    resetPasswordToken: token,
+                    resetPasswordExpires: { [Op.gt]: Date.now() }
+                }
+            });
+        }
+
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid or expired token' });
+        }
+
+        // Hash the new password
+        const hashedPassword = bcrypt.hashSync(password, 10);
+
+        // Update password and clear the reset token and expiration
+        user.password = hashedPassword;
+        user.resetPasswordToken = null;
+        user.resetPasswordExpires = null;
+
+        await user.save();
+
+        // Log the password reset action
+        await History.create({
+            userId: user.id,
+            action: 'Password reset',
+            timestamp: new Date()
+        });
+
+        res.status(200).json({ message: 'Password has been reset successfully' });
     } catch (error) {
-      console.error('Reset Password error:', error);
-      res.status(500).json({ message: 'Internal server error' });
+        console.error('Reset Password error:', error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 };
+
 
 // Send Registration Link
 const sendRegistrationLink = async (req, res) => {
