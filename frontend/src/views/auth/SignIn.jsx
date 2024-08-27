@@ -26,7 +26,7 @@ export default function SignIn() {
   
     try {
       const response = await axios.post('http://localhost:5000/superadmins/login', { email, password });
-      console.log('Response:', response); // Log the full response
+      console.log('Response:', response); // Log full response
   
       if (response.data && response.data.token) {
         const expiration = keepLoggedIn ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000;
@@ -36,22 +36,30 @@ export default function SignIn() {
         localStorage.setItem('tokenExpiry', expiryDate.toISOString());
   
         if (response.data.user) {
-          console.log('User Data:', response.data.user); // Log user data to inspect its structure
+          console.log('User Data:', response.data.user); // Inspect this log
   
-          const { fullname, email, id } = response.data.user;
+          const { fullname, email, id, role } = response.data.user;
   
-          localStorage.setItem('fullname', fullname || '');
-          localStorage.setItem('email', email || '');
-          localStorage.setItem('id', id || ''); // Ensure this is correct
+          // Check if role is present in the user object
+          if (role) {
+            localStorage.setItem('fullname', fullname || '');
+            localStorage.setItem('email', email || '');
+            localStorage.setItem('id', id || '');
+            localStorage.setItem('role', role || '');
   
-          console.log('Full name saved:', localStorage.getItem('fullname'));
-          console.log('Email saved:', localStorage.getItem('email'));
-          console.log('User ID saved:', localStorage.getItem('id'));
+            console.log('Full name saved:', localStorage.getItem('fullname'));
+            console.log('Email saved:', localStorage.getItem('email'));
+            console.log('User ID saved:', localStorage.getItem('id'));
+            console.log('Role saved:', localStorage.getItem('role')); // Check role here
+  
+            navigate('/admin/default');
+            window.location.reload(); // This will refresh the page
+          } else {
+            console.error('Role is missing in user data');
+          }
         } else {
           console.error('User data is missing');
         }
-  
-        navigate('/admin/default');
       }
     } catch (err) {
       console.error('Error:', err);
@@ -77,6 +85,7 @@ export default function SignIn() {
       setLoading(false);
     }
   };
+  
   
   
 

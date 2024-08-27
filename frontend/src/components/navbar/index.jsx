@@ -29,12 +29,17 @@ const Navbar = (props) => {
     }
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("fullname");
-    localStorage.removeItem("id");
-    navigate("/auth/sign-in");
-  };
+const handleLogout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("fullname");
+  localStorage.removeItem("email");
+  localStorage.removeItem("id");
+  localStorage.removeItem("role");
+  navigate("/auth/sign-in");
+  window.location.reload(); // This will refresh the page
+};
+
+
 
   return (
     <nav className="sticky top-4 z-40 flex flex-row flex-wrap items-center justify-between rounded-xl bg-white/10 p-2 backdrop-blur-xl dark:bg-[#0b14374d]">

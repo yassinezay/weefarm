@@ -1,6 +1,7 @@
 import React from "react";
 import InviteUser from "views/admin/accounts/ajoutadmin";
 import EditAdmin from "views/admin/accounts/editadmin";
+import AddProduct from "views/admin/tables/AddProduct";
 
 const Adminroutes = [
   {
@@ -14,6 +15,12 @@ const Adminroutes = [
     layout: "/admin",
     path: "accounts/editadmin/:id",
     component: <EditAdmin />,
+  },
+  {
+    name: "Add Product",
+    layout: "/admin",
+    path: "tables/addproduct",
+    component: <AddProduct />,
   }
   // Add other routes here
 ];
