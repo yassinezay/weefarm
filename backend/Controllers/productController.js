@@ -167,6 +167,7 @@ const searchProduct = async (req, res) => {
     }
 };
 
+
 module.exports = {
     addProduct,
     updateProduct,
