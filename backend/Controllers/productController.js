@@ -142,12 +142,16 @@ const displayProduct = async (req, res) => {
 // List Products
 const listProduct = async (req, res) => {
     try {
+        console.log('Fetching products...'); // Ajout du log
         const products = await Product.findAll();
+        console.log('Products fetched:', products); // Ajout du log
         res.status(200).json(products);
     } catch (error) {
+        console.error('Error fetching products:', error); // Ajout du log d'erreur
         res.status(500).json({ error: error.message });
     }
 };
+
 
 // Search Products
 const searchProduct = async (req, res) => {
